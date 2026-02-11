@@ -1,8 +1,55 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Sample Page</title>
+  <title>Camera Bot</title>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+  <h2>📸 Camera Bot Test</h2>
+  <video id="video" width="300" autoplay></video>
+  <br><br>
+  <button onclick="takePhoto()">📷 Take & Send Photo</button>
+  <canvas id="canvas" width="300" height="150" style="display:none;"></canvas>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("❌ Camera access error: " + err);
+      });
+
+    function takePhoto() {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      sendToTelegram(dataUrl);
+    }
+
+    function sendToTelegram(base64Image) {
+      fetch("8482985887:AAGH9tO1P4auxhXMagBKT2xkOhHPRdhoxzI", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: "6765209842",
+          photo: base64Image
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("✅ Photo sent successfully!");
+        console.log(data);
+      })
+      .catch(err => {
+        alert("❌ Error sending photo: " + err);
+        console.error(err);
+      });
+    }
+  </script>
 </body>
-</html>
+</html> 
